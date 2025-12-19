@@ -83,7 +83,7 @@ def update_item(item_name: str, friend: str):
 
 class UpdateSharedBy(BaseModel):
     purchasedBy: List[str]
-
+# {"purchasedBy": [Alice, Bob]}
 # Update sharedBy for a specific item
 @app.patch("/items/{item_name}/shared-by", response_model=Item)
 def update_shared_by(item_name: str, update: UpdateSharedBy):
