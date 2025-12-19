@@ -48,9 +48,9 @@ class Friend(BaseModel):
     name: str
 
 #get all friends
-@app.get("/friends", response_model=List[Friend])
+@app.get("/friends", response_model=List[Friend]) #converts JSON to python object
 def get_friends():
-    return friends
+    return friends #returns JSON to front-end
 
 #in memory storage
 @app.post("/friends", response_model=Friend)
