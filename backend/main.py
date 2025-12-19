@@ -40,6 +40,47 @@ def parse_receipt_text(text: str):
             items.append({"name": name, "price": price})
     return items
 
+#item management
+items = []
+
+class Item(BaseModel):
+    name: str
+    price: float
+    purchasedBy: List[str] = []  #initially empty. suggest type is list of str
+
+#get all items
+@app.get("/items", response_model=List[Item]) #converts JSON to python object
+def get_items():
+    return items
+
+#Front end sends in an item, and backend adds it to the items list and returns added item
+@app.post("/items", response_model=Item)
+def add_item(item: Item):
+    items.append(item)
+    return item
+
+#delete an item by name
+@app.delete("/items/{item_name}", response_model=dict)
+def delete_item(item_name: str):
+    global items
+    for i in items:
+        if i.name == item_name:
+            items = [item for item in items if item.name != item_name]
+            return {"message": f"Item '{item_name}' deleted."}
+        else:
+            print("Item not found")
+
+
+#opt in to sharing an item
+@app.put("/items/{item_name}", response_model=Item)
+def update_item(item_name: str, friend: str):
+    for i in items:
+        if i.name == item_name and friend not in i.purchasedBy:
+            i.purchasedBy.append(friend)
+            return i
+    raise HTTPException(status_code=404, detail="Item not found")
+
+
 
 #user management
 friends = []

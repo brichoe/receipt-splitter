@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-//definition
+// Type definitions
 type Item = {
   name: string;
   price: number;
+  purchasedBy: string[];
 };
 
 type Friend = {
@@ -14,11 +15,14 @@ type Friend = {
 function App() {
   const [file, setFile] = useState<File | null>(null);
   const [items, setItems] = useState<Item[]>([]);
-
-  //friend constant
+  const [newItem, setNewItem] = useState("");
+  const [newPrice, setNewPrice] = useState<number | "">("");
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [newFriend, setNewFriend] = useState(""); 
+  const [newFriend, setNewFriend] = useState("");
 
+  // -------------------
+  // Upload receipt
+  // -------------------
   const handleUpload = async () => {
     if (!file) return;
     const formData = new FormData();
@@ -33,58 +37,139 @@ function App() {
     setItems(data.items);
   };
 
-  //fetch friends from backend
+  // -------------------
+  // Fetch friends
+  // -------------------
   const fetchFriends = async () => {
     const res = await fetch("http://localhost:8000/friends");
     const data = await res.json();
     setFriends(data);
   };
 
-  //makes friends list update when page reloads
   useEffect(() => {
     fetchFriends();
+    fetchItems(); // fetch items on page load
   }, []);
 
-  //add friend
+  // -------------------
+  // Add friend
+  // -------------------
   const handleAddFriend = async () => {
-    console.log("Add friend clicked:", newFriend);
-    if (!newFriend) return;
+    if (!newFriend.trim()) return;
     const res = await fetch("http://localhost:8000/friends", {
-    method: "POST",
-    body: JSON.stringify({ name: newFriend }),
-    headers: { "Content-Type": "application/json" }   });
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newFriend }),
+    });
     const addedFriend = await res.json();
-    setFriends((prev) => [...prev, addedFriend]); // update frontend state immediately
+    setFriends((prev) => [...prev, addedFriend]);
     setNewFriend("");
+  };
+
+  // -------------------
+  // Fetch items
+  // -------------------
+  const fetchItems = async () => {
+    const res = await fetch("http://localhost:8000/items");
+    const data = await res.json();
+    setItems(data);
+  };
+
+  // -------------------
+  // Delete item
+  // -------------------
+  const deleteItem = async (name: string) => {
+    const res = await fetch(`http://localhost:8000/items/${encodeURIComponent(name)}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setItems(items.filter((item) => item.name !== name));
+    } else {
+      const error = await res.json();
+      alert(error.detail);
+    }
+  };
+
+    // -------------------
+  // Add item
+  // -------------------
+  const handleAddItem = async () => {
+    if (!newItem.trim() || newPrice === "" || newPrice <= 0) {
+      alert("Please enter a valid item name and price");
+      return;
+    }
+
+    const res = await fetch("http://localhost:8000/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newItem, price: newPrice, purchasedBy: [] }),
+    });
+    
+    const addedItem = await res.json();
+    setItems((prev) => [...prev, addedItem]);
+    setNewItem("");
+    setNewPrice("");
   };
 
   return (
     <div className="App">
       <h1>Receipt Splitter</h1>
-      <input type="file" onChange={e => setFile(e.target.files?.[0] || null)} />
+
+      {/* Upload receipt */}
+      <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
       <button onClick={handleUpload}>Upload</button>
 
+      {/* Friends list */}
       <h2>Friends</h2>
-      <ul>
-        {friends.map((friend, idx) => (<li key={idx}>{friend.name}</li>))}
-      </ul>
-      <input value={newFriend} onChange={(e) => setNewFriend(e.target.value)} placeholder="Add a friend"/>
-      <button onClick ={handleAddFriend}>Add Friend</button>
 
+      <input
+        value={newFriend}
+        onChange={(e) => setNewFriend(e.target.value)}
+        placeholder="Add a friend"
+      />
+      <button onClick={handleAddFriend}>Add Friend</button>
+
+
+      <ul>
+        {friends.map((friend, idx) => (
+          <li key={idx}>{friend.name}</li>
+        ))}
+      </ul>
+      
+      {/* Items table */}
+      <h2>Items</h2>
+      <input
+        value={newItem}
+        onChange={(e) => setNewItem(e.target.value)}
+        placeholder="Item name"
+      />
+      <input
+        type="number"
+        value={newPrice}
+        onChange={(e) => setNewPrice(Number(e.target.value))}
+        placeholder="Price"
+      />
+      <button onClick={handleAddItem}>Add Item</button>
 
       <table>
         <thead>
           <tr>
             <th>Item</th>
             <th>Price</th>
+            <th>Shared By</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, index) => (
-            //map is a loop. index only needed for TS to keep track between copies
-            <tr key={index}> 
+            <tr key={index}>
               <td>{item.name}</td>
               <td>${item.price.toFixed(2)}</td>
+              <td>{item.purchasedBy.join(", ")}</td>
+              <td>
+                <button onClick={() => deleteItem(item.name)}>Delete</button>
+              </td>
             </tr>
           ))}
         </tbody>
