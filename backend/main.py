@@ -72,6 +72,7 @@ def delete_item(item_name: str):
 
 
 #opt in to sharing an item
+
 @app.put("/items/{item_name}", response_model=Item)
 def update_item(item_name: str, friend: str):
     for i in items:
@@ -80,7 +81,17 @@ def update_item(item_name: str, friend: str):
             return i
     raise HTTPException(status_code=404, detail="Item not found")
 
+class UpdateSharedBy(BaseModel):
+    purchasedBy: List[str]
 
+# Update sharedBy for a specific item
+@app.patch("/items/{item_name}/shared-by", response_model=Item)
+def update_shared_by(item_name: str, update: UpdateSharedBy):
+    for item in items:
+        if item.name == item_name:
+            item.purchasedBy = update.purchasedBy
+            return item
+    raise HTTPException(status_code=404, detail="Item not found")
 
 #user management
 friends = []
