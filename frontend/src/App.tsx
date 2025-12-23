@@ -64,8 +64,8 @@ function App() {
 
       const isAlreadyShared = item.purchasedBy.includes(friendName);
       const updatedPurchasedBy = isAlreadyShared
-        ? item.purchasedBy.filter((name) => name !== friendName)
-        : [...item.purchasedBy, friendName];
+        ? item.purchasedBy.filter((name) => name !== friendName) //if friend is already sharing -> return list without them
+        : [...item.purchasedBy, friendName]; //if friend is not already sharing -> return list adding them
 
       // Optional: send update to backend here
       // updateItemSharedBy(item.name, updatedPurchasedBy);
@@ -83,7 +83,7 @@ function App() {
 };
 
 
-//compute totals
+//compute totals. using derived attributes (useState) so they update when those are called
 
 const calculateTotals = () => {
   const totals: Record<string, number> = {};
@@ -176,14 +176,13 @@ const calculateTotals = () => {
 
 
       <h2>Totals</h2>
-<ul>
+<ul> 
   {Object.entries(calculateTotals()).map(([friend, total]) => (
     <li key={friend}>
       {friend}: ${total.toFixed(2)}
     </li>
   ))}
 </ul>
-
 
     </div>
   );
