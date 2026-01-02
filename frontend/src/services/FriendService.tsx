@@ -1,4 +1,4 @@
-import { Friend } from "./types";
+import { Friend } from "../types";
 
 export const fetchFriends = async (): Promise<Friend[]> => {
   const res = await fetch("http://localhost:8000/friends");
