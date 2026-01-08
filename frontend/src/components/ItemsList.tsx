@@ -42,7 +42,8 @@ const ItemsList = ({ items, friends, addItem, deleteItem, toggleSharedBy, loadin
       >
         Add Item
       </button>
-
+ {/* only display if items array isn't empty */}
+    {items.length > 0 && (
       <table>
         <thead>
           <tr>
@@ -76,6 +77,7 @@ const ItemsList = ({ items, friends, addItem, deleteItem, toggleSharedBy, loadin
           ))}
         </tbody>
       </table>
+    )}
     </div>
   );
 };

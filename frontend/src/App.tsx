@@ -96,7 +96,7 @@ function App() {
     const res = await fetch(`http://localhost:8000/items/${encodeURIComponent(name)}`, {
       method: "DELETE",
     });
-    if (!res.ok) return; //if fail
+    if (!res.ok) {alert("Failed to delete item!");} //if fail
     setItems((prev) => prev.filter((i) => i.name !== name));
   };
 
@@ -148,6 +148,9 @@ function App() {
         error={uploadError}
       />
 
+
+      <div className = "list-container" style = {{display: "flex", flexWrap: "wrap", gap: "100px", justifyContent: "center",}}>
+
       <FriendsList
         friends={friends}
         addFriend={handleAddFriend}
@@ -164,6 +167,12 @@ function App() {
         loading={loadingItems}
         error={errorItems}
       />
+
+
+        
+      </div>
+
+    
 
       <Totals items={items} friends={friends} />
     </div>

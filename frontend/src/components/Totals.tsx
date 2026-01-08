@@ -1,6 +1,8 @@
 import React from "react";
 import { Item, Friend } from "../types";
 
+//totals are all done front-end
+
 interface Props {
   items: Item[];
   friends: Friend[];
